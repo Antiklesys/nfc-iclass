@@ -71,7 +71,7 @@ static nfc_device *pnd;
 static nfc_target nt;
 // unpermuted version of https://github.com/ss23/hid-iclass-key/blob/master/key
 // permuted is 3F90EBF0910F7B6F
-uint8_t *Default_kd= (uint8_t *) "\xAF\xA7\x85\xA7\xDA\xB3\x33\x78"; 
+uint8_t *Default_kd= (uint8_t *) "\xAF\xA7\x85\xA7\xDA\xB3\x33\x78";
 
 // HID DES keys needed for this to work!
 static DES_cblock Key1 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
     ERR("Unable to init libnfc (malloc)");
     exit(EXIT_FAILURE);
   }
-
+/*
   // Try to open the NFC device
   pnd = nfc_open(context, NULL);
   if (pnd == NULL) {
@@ -367,7 +367,7 @@ int main(int argc, char **argv)
         printf("%02x", (uint8_t) buff[j]);
       printf("  ");
       for(j= 0 ; j < 8 ; ++j)
-	printf("%c", isprint(buff[j]) ? (char) buff[j] : '.');    
+	printf("%c", isprint(buff[j]) ? (char) buff[j] : '.');
       printf("  ");
       iclass_print_blocktype(i, app1_limit, buff);
       if(dump)
@@ -378,7 +378,7 @@ int main(int argc, char **argv)
       printf("read failed!");
     printf("\n");
     }
-  printf("\n");
+  printf("\n"); */
 
   // APP1 operations only if APP2 not requested OR APP1 key specifically provided
   // (this allows you to get past an unknown key for APP1 without causing an auth error)
@@ -393,14 +393,14 @@ int main(int argc, char **argv)
     for(i= 0 ; i < 8 ; ++i)
       printf("%02x", key[i]);
     printf("\n\n");
-    if(!iclass_authenticate(pnd, nt, key, elite, true, true))
+/*     if(!iclass_authenticate(pnd, nt, key, elite, true, true))
     {
       ERR("authentication failed\n");
        nfc_close(pnd);
       nfc_exit(context);
       // carry on if we wanted to read APP2
       exit(EXIT_FAILURE);
-    }
+    } */
 
     // write config card if specified
     if(config)
@@ -418,9 +418,10 @@ int main(int argc, char **argv)
         printf("\n  Writing KEYROLL card: %s\n\n", configtype);
           for(i= 0 ; i < 2 ; ++i)
             {
-            if(iclass_write(pnd, i +6, configdata[i]))
+/*             if(iclass_write(pnd, i +6, configdata[i]))
               return errorexit("Write failed!\n");
-            else
+            else */
+            printf("    Written block %02x\n", configdata[i]);
               printf("    Written block %02x\n", i + 6);
             }
           for(i= 0x08 ; i < 0x0d ; ++i)
@@ -433,35 +434,40 @@ int main(int argc, char **argv)
           DES_set_key_unchecked(&Key1, &SchKey1);
           DES_set_key_unchecked(&Key2, &SchKey2);
           DES_ecb2_encrypt((unsigned char (*)[8]) kr, (unsigned char (*)[8]) buff, &SchKey1, &SchKey2, DES_ENCRYPT);
-          if(iclass_write(pnd, 0x0d, buff))
+/*           if(iclass_write(pnd, 0x0d, buff))
             return errorexit("Write failed!\n");
-          else
+          else */
+            printf("    Written block %02x\n", buff);
             printf("    Written block 0d (KEYROLL KEY)\n");
           DES_ecb2_encrypt((unsigned char (*)[8]) Config_block_other, (unsigned char (*)[8]) buff, &SchKey1, &SchKey2, DES_ENCRYPT);
           for(i= 0x0e ; i < 0x14 ; ++i)
-            if(iclass_write(pnd, i, buff))
+          printf("    Written block %02x\n", buff);
+/*             if(iclass_write(pnd, i, buff))
               return errorexit("Write failed!\n");
-            else
+            else */
               printf("    Written block %02x\n", i);
           buff2[0]= 0x15;
           memcpy(&buff2[1], kr, 7);
           DES_ecb2_encrypt((unsigned char (*)[8]) buff2, (unsigned char (*)[8]) buff, &SchKey1, &SchKey2, DES_ENCRYPT);
-          if(iclass_write(pnd, 0x14, buff))
+          printf("    Written block %02x\n", buff2);
+/*           if(iclass_write(pnd, 0x14, buff))
             return errorexit("Write failed!\n");
-          else
+          else */
             printf("    Written block 14 (Partial KEYROLL KEY)\n");
           memset(buff2, 0xff, 8);
           buff2[0]= kr[7];
           DES_ecb2_encrypt((unsigned char (*)[8]) buff2, (unsigned char (*)[8]) buff, &SchKey1, &SchKey2, DES_ENCRYPT);
-          if(iclass_write(pnd, 0x15, buff))
+          printf("    Written block %02x\n", buff);
+/*           if(iclass_write(pnd, 0x15, buff))
             return errorexit("Write failed!\n");
-          else
+          else */
             printf("    Written block 15 (Partial KEYROLL KEY)\n");
           DES_ecb2_encrypt((unsigned char (*)[8]) Config_block_other, (unsigned char (*)[8]) buff, &SchKey1, &SchKey2, DES_ENCRYPT);
           for(i= 0x16 ; i <= app1_limit ; ++i)
-            if(iclass_write(pnd, i, buff))
+          printf("    Written block %02x\n", buff);
+/*             if(iclass_write(pnd, i, buff))
               return errorexit("Write failed!\n");
-            else
+            else */
               printf("    Written block %02x\n", i);
           }
       else
@@ -517,7 +523,7 @@ int main(int argc, char **argv)
           printf("%02x", (uint8_t) buff[j]);
         printf("  ");
         for(j= 0 ; j < 8 ; ++j)
-          printf("%c", isprint(buff[j]) ? (char) buff[j] : '.');    
+          printf("%c", isprint(buff[j]) ? (char) buff[j] : '.');
         printf("  ");
         iclass_print_blocktype(i, app1_limit, buff);
         if(dump)
@@ -580,7 +586,7 @@ int main(int argc, char **argv)
           printf("%02x", (uint8_t) buff[j]);
         printf("  ");
         for(j= 0 ; j < 8 ; ++j)
-  	printf("%c", isprint(buff[j]) ? (char) buff[j] : '.');    
+  	printf("%c", isprint(buff[j]) ? (char) buff[j] : '.');
         printf("  ");
         iclass_print_blocktype(i, app1_limit, buff);
         if(dump)
