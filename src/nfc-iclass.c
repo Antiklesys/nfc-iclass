@@ -74,8 +74,8 @@ static nfc_target nt;
 uint8_t *Default_kd= (uint8_t *) "\xAF\xA7\x85\xA7\xDA\xB3\x33\x78";
 
 // HID DES keys needed for this to work!
-static DES_cblock Key1 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-static DES_cblock Key2 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static DES_cblock Key1 = { 0xb4, 0x21, 0x2c, 0xca, 0xb7, 0xed, 0x21, 0x0f };
+static DES_cblock Key2 = { 0x7b, 0x93, 0xd4, 0x59, 0x39, 0xc7, 0xdd, 0x36 };
 static DES_key_schedule SchKey1,SchKey2;
 
 #define MAXWRITE 2000 // 0xff * 8 byte blocks - 5 * 8 byte reserved blocks
@@ -413,6 +413,7 @@ int main(int argc, char **argv)
           printf("\nPlease specify KEYROLL key!\n");
           return 1;
           }
+        app1_limit= 0xff;
         if(app1_limit < 0x16)
           return errorexit("\nAPP1 too small for KEYROLL!\n");
         printf("\n  Writing KEYROLL card: %s\n\n", configtype);
@@ -425,9 +426,10 @@ int main(int argc, char **argv)
               printf("    Written block %02x\n", i + 6);
             }
           for(i= 0x08 ; i < 0x0d ; ++i)
-            if(iclass_write(pnd, i, Config_block_other))
+/*             if(iclass_write(pnd, i, Config_block_other))
               return errorexit("Write failed!\n");
-            else
+            else */
+              printf("    Written block %02x\n", Config_block_other);
               printf("    Written block %02x\n", i);
           // update keyroll blocks
           // keyroll cards are 3DES encrypted for block 0x0d upwards
